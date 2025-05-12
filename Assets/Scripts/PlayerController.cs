@@ -20,9 +20,11 @@ public class PlayerController : MonoBehaviour
     public bool isClimbing;
     public bool canClimb;
     public bool isCrawl;
-    public Collider selfCollider;
-    public Animator animator;
+    private CapsuleCollider selfCapsuleCollider;
+    private float defaultCapsuleHeight;
+    private Animator animator;
 
+    //audio
     public AudioSource audioSource; // import AudioSource
     public AudioClip footstepSound; // footstep audio
 
@@ -34,7 +36,8 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        selfCollider = GetComponent<Collider>();
+        selfCapsuleCollider = GetComponent<CapsuleCollider>();
+        defaultCapsuleHeight = selfCapsuleCollider.height;
         animator = GetComponentInChildren<Animator>();
         audioSource = GetComponent<AudioSource>();  // get AudioSource component
     }
@@ -193,11 +196,15 @@ public class PlayerController : MonoBehaviour
                     return;
                 }
                 //transform.localScale = new Vector3(1, 1, 1);
+                selfCapsuleCollider.height = defaultCapsuleHeight;
+                selfCapsuleCollider.center *= 0;
                 isCrawl = false;
             }
             else
             {
                 //transform.localScale = new Vector3(1, 0.5f, 1);
+                selfCapsuleCollider.height = defaultCapsuleHeight / 2;
+                selfCapsuleCollider.center = new Vector3(0, (selfCapsuleCollider.height - defaultCapsuleHeight) / 2, 0);
                 isCrawl = true;
             }
             animator.SetBool("isCrouch", isCrawl);
@@ -211,7 +218,7 @@ public class PlayerController : MonoBehaviour
         int count = Physics.OverlapBoxNonAlloc(groundCheckPoint.position, new Vector3(.5f, .1f, .5f), cols);
         for (int i = 0; i < count; i++)
         {
-            if (cols[i] != selfCollider)
+            if (cols[i] != selfCapsuleCollider)
             {
                 isGrounded = true;
                 break;
